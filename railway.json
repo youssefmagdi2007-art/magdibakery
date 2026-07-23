@@ -1,0 +1,13 @@
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "gunicorn --bind 0.0.0.0:$PORT magdisbakery.wsgi",
+    "healthcheckPath": "/health/",
+    "restartPolicyType": "ON_FAILURE",
+    "release": {
+      "command": "python manage.py migrate --noinput && python manage.py collectstatic --noinput"
+    }
+  }
+}

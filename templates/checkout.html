@@ -1,0 +1,890 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout - MagdisBakery{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="bg-light py-2">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active">Checkout</li>
+        </ol>
+    </div>
+</nav>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ====== CHECKOUT WIZARD ====== */
+    .checkout-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px 0;
+    }
+
+    .checkout-progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        position: relative;
+        padding: 0 10px;
+    }
+
+    .checkout-progress::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 40px;
+        right: 40px;
+        height: 3px;
+        background: #dee2e6;
+        z-index: 0;
+    }
+
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+        cursor: pointer;
+    }
+
+    .progress-step .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #dee2e6;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        border: 3px solid #dee2e6;
+    }
+
+    .progress-step.active .step-number {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+        box-shadow: 0 0 0 5px rgba(40, 167, 69, 0.2);
+    }
+
+    .progress-step.completed .step-number {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+    .progress-step .step-label {
+        margin-top: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6c757d;
+        transition: color 0.3s ease;
+    }
+
+    .progress-step.active .step-label,
+    .progress-step.completed .step-label {
+        color: #28a745;
+    }
+
+    .checkout-step {
+        display: none;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .checkout-step.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid #e9ecef;
+    }
+
+    .step-card h3 {
+        color: #28a745;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .step-card .step-subtitle {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+    }
+
+    .delivery-options {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .delivery-option {
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .delivery-option:hover {
+        border-color: #28a745;
+    }
+
+    .delivery-option.selected {
+        border-color: #28a745;
+        background: #f0fdf4;
+    }
+
+    .delivery-option i {
+        font-size: 1.8rem;
+        color: #28a745;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .delivery-option .option-label {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .delivery-option .option-desc {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .address-form .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .address-form .form-row.full-width {
+        grid-template-columns: 1fr;
+    }
+
+    .address-form label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #212529;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .address-form input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: border-color 0.3s ease;
+        background: white;
+    }
+
+    .address-form input:focus {
+        outline: none;
+        border-color: #28a745;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+
+    .address-form input.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .address-form .error-text {
+        color: #dc3545;
+        font-size: 0.8rem;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .address-form .error-text.show {
+        display: block;
+    }
+
+    .store-locations {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 15px 0;
+    }
+
+    .store-location {
+        padding: 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        text-align: center;
+    }
+
+    .store-location:hover {
+        border-color: #28a745;
+    }
+
+    .store-location.selected {
+        border-color: #28a745;
+        background: #f0fdf4;
+    }
+
+    .store-location .location-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .store-location .location-address {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+
+    .step-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 25px;
+        gap: 15px;
+    }
+
+    .step-actions .btn {
+        padding: 12px 35px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-prev {
+        background: #f8f9fa;
+        color: #212529;
+        border: 2px solid #dee2e6;
+    }
+
+    .btn-prev:hover {
+        background: #e9ecef;
+    }
+
+    .btn-prev:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-next {
+        background: #28a745;
+        color: white;
+        border: none;
+    }
+
+    .btn-next:hover {
+        background: #1e7e34;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    /* Payment tabs */
+    .nav-pills .nav-link {
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 600;
+        color: #495057;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+
+    .nav-pills .nav-link.active {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+    .nav-pills .nav-link i {
+        margin-right: 8px;
+    }
+
+    .tab-content {
+        margin-top: 20px;
+    }
+
+    .tab-pane .btn-next {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    /* Confirmation step - big tick */
+    .confirmation-icon {
+        font-size: 5rem;
+        color: #28a745;
+        animation: popIn 0.6s ease;
+    }
+
+    @keyframes popIn {
+        0% { transform: scale(0); opacity: 0; }
+        80% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+        .checkout-progress {
+            padding: 0 5px;
+        }
+        .checkout-progress::before {
+            left: 20px;
+            right: 20px;
+        }
+        .progress-step .step-label {
+            font-size: 0.65rem;
+        }
+        .progress-step .step-number {
+            width: 32px;
+            height: 32px;
+            font-size: 0.8rem;
+        }
+        .step-card {
+            padding: 20px;
+        }
+        .address-form .form-row {
+            grid-template-columns: 1fr;
+        }
+        .delivery-options {
+            flex-direction: column;
+        }
+        .store-locations {
+            grid-template-columns: 1fr;
+        }
+        .step-actions {
+            flex-direction: column-reverse;
+        }
+        .step-actions .btn {
+            width: 100%;
+            text-align: center;
+        }
+        .nav-pills {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .nav-pills .nav-link {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+    .address-section { display: block; }
+    .pickup-section { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <h2 class="fw-bold mb-4" style="color: #28a745;">Checkout</h2>
+
+    <!-- Progress Bar -->
+    <div class="checkout-progress" id="checkoutProgress">
+        <div class="progress-step active" data-step="1">
+            <div class="step-number">1</div>
+            <span class="step-label">Address</span>
+        </div>
+        <div class="progress-step" data-step="2">
+            <div class="step-number">2</div>
+            <span class="step-label">Payment</span>
+        </div>
+        <div class="progress-step" data-step="3">
+            <div class="step-number">3</div>
+            <span class="step-label">Confirmation</span>
+        </div>
+    </div>
+
+    <!-- Step 1: Address -->
+    <div class="checkout-step active" id="step1">
+        <div class="step-card">
+            <h3><i class="fas fa-map-marker-alt me-2"></i>Delivery Address</h3>
+            <p class="step-subtitle">Where would you like your order delivered?</p>
+
+            <div class="delivery-options" id="deliveryOptions">
+                <div class="delivery-option selected" data-delivery="home">
+                    <i class="fas fa-home"></i>
+                    <div class="option-label">Home Delivery</div>
+                    <div class="option-desc">Deliver to your address</div>
+                </div>
+                <div class="delivery-option" data-delivery="pickup">
+                    <i class="fas fa-store"></i>
+                    <div class="option-label">Store Pickup</div>
+                    <div class="option-desc">Pick up from our store</div>
+                </div>
+            </div>
+
+            <!-- Home Delivery -->
+            <div class="address-section" id="addressSection">
+                <form id="addressForm" class="address-form">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div>
+                            <label for="address_line1">Street Address <span class="text-danger">*</span></label>
+                            <input type="text" id="address_line1" name="address_line1" placeholder="123 Main Street" required value="{{ initial_data.address_line1|default:'' }}">
+                            <div class="error-text" id="address_line1_error">Please enter your street address.</div>
+                        </div>
+                        <div>
+                            <label for="address_line2">Apartment / Suite</label>
+                            <input type="text" id="address_line2" name="address_line2" placeholder="Apt 4B" value="{{ initial_data.address_line2|default:'' }}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="compound">Compound / Building Name</label>
+                            <input type="text" id="compound" name="compound" placeholder="Garden City Compound" value="{{ initial_data.compound|default:'' }}">
+                        </div>
+                        <div>
+                            <label for="building_number">Building Number</label>
+                            <input type="text" id="building_number" name="building_number" placeholder="Building 5" value="{{ initial_data.building_number|default:'' }}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="city">City <span class="text-danger">*</span></label>
+                            <input type="text" id="city" name="city" placeholder="Cairo" required value="{{ initial_data.city|default:'' }}">
+                            <div class="error-text" id="city_error">Please enter your city.</div>
+                        </div>
+                        <div>
+                            <label for="area">Area / District <span class="text-danger">*</span></label>
+                            <input type="text" id="area" name="area" placeholder="Maadi, Zamalek, etc." required value="{{ initial_data.area|default:'' }}">
+                            <div class="error-text" id="area_error">Please enter your area.</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="postal_code">Postal Code</label>
+                            <input type="text" id="postal_code" name="postal_code" placeholder="12345" value="{{ initial_data.postal_code|default:'' }}">
+                        </div>
+                        <div>
+                            <label for="phone">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" id="phone" name="phone" placeholder="01012345678" required value="{{ initial_data.phone|default:'' }}">
+                            <div class="error-text" id="phone_error">Please enter your phone number.</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Store Pickup -->
+            <div class="pickup-section" id="pickupSection">
+                <p class="text-muted small mb-3"><i class="fas fa-info-circle me-1"></i> Please select a store location for pickup:</p>
+                <div class="store-locations" id="storeLocations">
+                    <div class="store-location selected" data-location="Store 1 - Cairo Downtown">
+                        <div class="location-name">Store 1 - Cairo Downtown</div>
+                        <div class="location-address">123 Tahrir St, Downtown, Cairo</div>
+                    </div>
+                    <div class="store-location" data-location="Store 2 - Maadi">
+                        <div class="location-name">Store 2 - Maadi</div>
+                        <div class="location-address">45 Road 9, Maadi, Cairo</div>
+                    </div>
+                    <div class="store-location" data-location="Store 3 - Zamalek">
+                        <div class="location-name">Store 3 - Zamalek</div>
+                        <div class="location-address">22 Shagaret El Dor St, Zamalek, Cairo</div>
+                    </div>
+                    <div class="store-location" data-location="Store 4 - New Cairo">
+                        <div class="location-name">Store 4 - New Cairo</div>
+                        <div class="location-address">Fifth Settlement, New Cairo</div>
+                    </div>
+                    <div class="store-location" data-location="Store 5 - Alexandria">
+                        <div class="location-name">Store 5 - Alexandria</div>
+                        <div class="location-address">Corniche Road, Alexandria</div>
+                    </div>
+                </div>
+                <p class="text-muted small mt-2"><i class="fas fa-store me-1"></i> Client store locations will be added in these options.</p>
+            </div>
+
+            <div class="step-actions">
+                <button type="button" class="btn btn-prev" disabled>Back</button>
+                <button type="button" class="btn btn-next" id="saveAddressBtn">Save &amp; Continue <i class="fas fa-arrow-right ms-2"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Payment -->
+    <div class="checkout-step" id="step2">
+        <div class="step-card">
+            <h3><i class="fas fa-credit-card me-2"></i>Payment Method</h3>
+            <p class="step-subtitle">Choose how you'd like to pay.</p>
+
+            <!-- Payment Tabs -->
+            <ul class="nav nav-pills mb-3" id="paymentTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="card-tab" data-bs-toggle="tab" data-bs-target="#card" type="button" role="tab" aria-controls="card" aria-selected="true">
+                        <i class="fas fa-credit-card me-1"></i> Pay with Card
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="cash-tab" data-bs-toggle="tab" data-bs-target="#cash" type="button" role="tab" aria-controls="cash" aria-selected="false">
+                        <i class="fas fa-money-bill-wave me-1"></i> Cash on Delivery
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="paymentTabContent">
+                <!-- Card Tab -->
+                <div class="tab-pane fade show active" id="card" role="tabpanel" aria-labelledby="card-tab">
+                    <div class="p-3 bg-light rounded mb-3">
+                        <p class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i> You will be redirected to the payment gateway (Paymob / Google Pay / etc.) to complete your payment securely.</p>
+                        <p class="mb-0 text-muted small mt-2">Payment integration coming soon – for now, orders will be placed as "Pending".</p>
+                    </div>
+                    <button type="button" class="btn btn-next w-100" id="cardConfirmBtn">
+                        <i class="fas fa-check me-2"></i> Confirm & Pay
+                    </button>
+                </div>
+
+                <!-- Cash on Delivery Tab -->
+                <div class="tab-pane fade" id="cash" role="tabpanel" aria-labelledby="cash-tab">
+                    <div class="p-3 bg-light rounded mb-3">
+                        <p class="mb-0"><i class="fas fa-info-circle me-2 text-success"></i> You will pay when your order arrives. No payment required now.</p>
+                    </div>
+                    <button type="button" class="btn btn-next w-100" id="cashConfirmBtn">
+                        <i class="fas fa-check me-2"></i> Confirm Order
+                    </button>
+                </div>
+            </div>
+
+            <div class="step-actions mt-4">
+                <button type="button" class="btn btn-prev" id="backToAddress">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Confirmation -->
+    <div class="checkout-step" id="step3">
+        <div class="step-card" style="text-align: center;">
+            <div class="confirmation-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="fw-bold mt-3" style="color: #28a745;">Order Confirmed!</h2>
+            <p class="lead" style="color: #212529;">Your order has been successfully placed.</p>
+            <p class="text-muted">A confirmation email has been sent to your registered email address.</p>
+            <p class="text-muted small">You will receive updates on your order status shortly.</p>
+            <div class="mt-4">
+                <a href="{% url 'home' %}" class="btn btn-primary" style="background: #28a745; border: none; padding: 12px 40px; border-radius: 10px; font-weight: 600;">
+                    <i class="fas fa-home me-2"></i>Return to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedDelivery = 'home';
+    let selectedStore = 'Store 1 - Cairo Downtown';
+
+    // Helper to get CSRF token
+    function getCSRFToken() {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+        return cookie ? cookie.split('=')[1] : '';
+    }
+
+    // Helper to get cart ID
+    function getCartId() {
+        return localStorage.getItem('cartId');
+    }
+
+    // Helper to check if cart exists
+    function checkCartExists(cartId) {
+        return fetch(`/api/carts/${cartId}/`)
+            .then(res => {
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        localStorage.removeItem('cartId');
+                        return null;
+                    }
+                    throw new Error('Failed to check cart');
+                }
+                return res.json();
+            });
+    }
+
+    // Delivery options toggle
+    document.querySelectorAll('.delivery-option').forEach(opt => {
+        opt.addEventListener('click', function() {
+            document.querySelectorAll('.delivery-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedDelivery = this.dataset.delivery;
+
+            if (selectedDelivery === 'home') {
+                document.getElementById('addressSection').style.display = 'block';
+                document.getElementById('pickupSection').style.display = 'none';
+            } else {
+                document.getElementById('addressSection').style.display = 'none';
+                document.getElementById('pickupSection').style.display = 'block';
+            }
+        });
+    });
+
+    // Store location selection
+    document.querySelectorAll('.store-location').forEach(loc => {
+        loc.addEventListener('click', function() {
+            document.querySelectorAll('.store-location').forEach(l => l.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedStore = this.dataset.location;
+        });
+    });
+
+    // ====== ADDRESS STEP ======
+    document.getElementById('saveAddressBtn').addEventListener('click', function() {
+        let addressData = {};
+
+        // Check if cart exists first
+        const cartId = getCartId();
+        if (!cartId) {
+            alert('No cart found. Please add items to your cart first.');
+            window.location.href = '/';
+            return;
+        }
+
+        if (selectedDelivery === 'home') {
+            const requiredFields = ['address_line1', 'city', 'area', 'phone'];
+            let isValid = true;
+            requiredFields.forEach(field => {
+                const input = document.getElementById(field);
+                const error = document.getElementById(field + '_error');
+                if (!input.value.trim()) {
+                    input.classList.add('is-invalid');
+                    error.classList.add('show');
+                    isValid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                    error.classList.remove('show');
+                }
+            });
+            const phone = document.getElementById('phone').value.trim();
+            if (phone && !/^[\d\s\+\-\(\)]{7,15}$/.test(phone)) {
+                document.getElementById('phone').classList.add('is-invalid');
+                document.getElementById('phone_error').textContent = 'Please enter a valid phone number.';
+                document.getElementById('phone_error').classList.add('show');
+                isValid = false;
+            }
+            if (!isValid) return;
+
+            addressData = {
+                address_line1: document.getElementById('address_line1').value.trim(),
+                address_line2: document.getElementById('address_line2').value.trim(),
+                compound: document.getElementById('compound').value.trim(),
+                building_number: document.getElementById('building_number').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                area: document.getElementById('area').value.trim(),
+                postal_code: document.getElementById('postal_code').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                delivery_method: 'home',
+                store_location: '',
+            };
+        } else {
+            addressData = {
+                address_line1: selectedStore,
+                address_line2: '',
+                compound: '',
+                building_number: '',
+                city: 'Store Pickup',
+                area: '',
+                postal_code: '',
+                phone: '',
+                delivery_method: 'pickup',
+                store_location: selectedStore,
+            };
+        }
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+
+        fetch('/api/checkout/save-address/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify(addressData)
+        })
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(errData => {
+                    throw new Error(errData.error || 'Server error');
+                });
+            }
+            return res.json();
+        })
+        .then(result => {
+            btn.disabled = false;
+            btn.innerHTML = 'Save & Continue <i class="fas fa-arrow-right ms-2"></i>';
+            if (result.success) {
+                localStorage.setItem('checkout_address', JSON.stringify(addressData));
+                // Move to step 2 (payment)
+                goToStep(2);
+            } else {
+                alert('Error saving address: ' + (result.error || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            btn.disabled = false;
+            btn.innerHTML = 'Save & Continue <i class="fas fa-arrow-right ms-2"></i>';
+            alert(err.message || 'There was a problem saving your address. Please try again.');
+        });
+    });
+
+    // ====== STEP NAVIGATION ======
+    function goToStep(step) {
+        document.querySelectorAll('.checkout-step').forEach(el => el.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+        document.querySelectorAll('.progress-step').forEach(el => {
+            const s = parseInt(el.dataset.step);
+            el.classList.remove('active', 'completed');
+            if (s === step) el.classList.add('active');
+            else if (s < step) el.classList.add('completed');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('backToAddress').addEventListener('click', function() {
+        goToStep(1);
+    });
+
+    // ====== PAYMENT CONFIRMATION ======
+    function placeOrder(paymentMethod) {
+        // Check if cart exists
+        const cartId = getCartId();
+        if (!cartId) {
+            alert('No cart found. Please add items to your cart first.');
+            window.location.href = '/';
+            return;
+        }
+
+        // Verify cart still exists in backend
+        checkCartExists(cartId)
+            .then(cartData => {
+                if (!cartData) {
+                    alert('Your cart has expired. Please add items again.');
+                    window.location.href = '/';
+                    return;
+                }
+                // Cart exists, proceed with order
+                proceedWithOrder(paymentMethod, cartId);
+            })
+            .catch(err => {
+                console.error('Error checking cart:', err);
+                alert('There was a problem with your cart. Please try again.');
+            });
+    }
+
+    function proceedWithOrder(paymentMethod, cartId) {
+        // Get address data from localStorage
+        let addressData = {};
+        try {
+            addressData = JSON.parse(localStorage.getItem('checkout_address')) || {};
+        } catch(e) {}
+
+        // Find which button was clicked
+        const btn = document.activeElement;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Placing Order...';
+        btn.disabled = true;
+
+        // Build full address based on delivery method
+        let fullAddress = '';
+        if (addressData.delivery_method === 'home') {
+            fullAddress = addressData.address_line1 || '';
+            if (addressData.address_line2) fullAddress += ', ' + addressData.address_line2;
+            if (addressData.compound) fullAddress += ' (' + addressData.compound + ')';
+            if (addressData.building_number) fullAddress += ', Building ' + addressData.building_number;
+            if (addressData.city) fullAddress += ', ' + addressData.city;
+            if (addressData.area) fullAddress += ', ' + addressData.area;
+        } else {
+            // For pickup, use the store name as the address
+            fullAddress = addressData.store_location || 'Store Pickup';
+        }
+
+        // Build order payload
+        const orderPayload = {
+            cart_id: cartId,
+            first_name: '{{ user.first_name }}',
+            last_name: '{{ user.last_name }}',
+            email: '{{ user.email }}',
+            phone: addressData.phone || '',
+            address: fullAddress || 'N/A',
+            city: addressData.delivery_method === 'home' ? (addressData.city || '') : 'Store Pickup',
+            notes: 'Delivery method: ' + (addressData.delivery_method || 'home') + '. Store: ' + (addressData.store_location || 'N/A'),
+            is_guest: false,
+            payment_method: paymentMethod,
+            delivery_method: addressData.delivery_method || 'home',
+        };
+
+        fetch('/api/orders/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify(orderPayload)
+        })
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(err => {
+                    throw new Error(JSON.stringify(err));
+                });
+            }
+            return res.json();
+        })
+        .then(data => {
+            // Clear cart and checkout data
+            localStorage.removeItem('cartId');
+            localStorage.removeItem('checkout_address');
+
+            // Move to step 3 (confirmation)
+            goToStep(3);
+        })
+        .catch(err => {
+            console.error('Error placing order:', err);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            let errorMsg = 'There was a problem placing your order.';
+            try {
+                const errorData = JSON.parse(err.message);
+                if (errorData.cart_id) {
+                    errorMsg = 'Cart expired. Please add items again.';
+                    localStorage.removeItem('cartId');
+                    window.location.href = '/';
+                    return;
+                }
+                const messages = Object.values(errorData).flat().join(' ');
+                if (messages) errorMsg = messages;
+            } catch(e) {
+                if (err.message) errorMsg = err.message;
+            }
+            alert(errorMsg);
+        });
+    }
+
+    // Card payment
+    document.getElementById('cardConfirmBtn').addEventListener('click', function() {
+        placeOrder('card');
+    });
+
+    // Cash on Delivery
+    document.getElementById('cashConfirmBtn').addEventListener('click', function() {
+        placeOrder('cash');
+    });
+</script>
+{% endblock %}

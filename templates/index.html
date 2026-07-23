@@ -1,0 +1,752 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}MagdisBakery - Premium Pastries & Cakes{% endblock %}
+
+{% block content %}
+
+<!-- 1. HERO IMAGES – clickable -->
+<section class="hero-section">
+    <a href="{% url 'ice_cream_tortes' %}">
+        <img src="https://xrsm102202001015ss3.lapoire.online/assets/images/1.jpg" 
+             alt="MagdisBakery" class="hero-image w-100" style="max-height: 500px; object-fit: cover; cursor: pointer;">
+    </a>
+</section>
+
+<!-- 2. ENJOY OUR DELICIOUS CATEGORIES - WITH FILTER BUTTONS -->
+<section class="container py-5">
+    <h2 class="text-center mb-4">Enjoy Our Delicious Categories</h2>
+    
+    <!-- 5 Category Buttons -->
+    <div class="filter-buttons-container text-center mb-4">
+        <button class="filter-btn active" data-filter="cakes">Cakes</button>
+        <button class="filter-btn" data-filter="can-cake">Can Cake</button>
+        <button class="filter-btn" data-filter="ice-cream-tortes">Ice Cream Tortes</button>
+        <button class="filter-btn" data-filter="tortes">Tortes</button>
+        <button class="filter-btn" data-filter="salty-snacks">Salty Snacks</button>
+    </div>
+    
+    <!-- Category Carousel -->
+    <div class="carousel-wrapper">
+        <div class="category-carousel-container">
+            <button class="carousel-arrow carousel-arrow-left" id="categoryArrowLeft">❮</button>
+            <div class="category-carousel">
+                <div class="carousel-track" id="categoryCarouselTrack">
+                    {% for product in carousel_products %}
+                    <div class="carousel-item-card" data-index="{{ forloop.counter0 }}">
+                        <div class="card product-card h-100 shadow-sm hover-effect" style="border-radius: 12px; border: none;">
+                            <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" 
+                                 style="height: 180px; width: 100%; object-fit: contain; background: #f8f9fa; border-radius: 12px 12px 0 0;" 
+                                 onerror="this.src='https://via.placeholder.com/200x200/28a745/ffffff?text=No+Image'">
+                            <div class="card-body" style="padding: 12px 15px;">
+                                <h6 class="card-title" style="font-weight: 600; font-size: 0.9rem;">{{ product.name }}</h6>
+                                <p class="fw-bold" style="color: #28a745; font-size: 0.95rem;">{{ product.price }} EGP</p>
+
+                                <div class="d-flex gap-2 mt-2 flex-wrap">
+                                    <button class="btn btn-sm like-btn" 
+                                            data-product-id="{{ product.id }}" 
+                                            data-liked="{% if user.is_authenticated and user in product.likes.all %}true{% else %}false{% endif %}"
+                                            style="border: 2px solid #dc3545; background: transparent; color: #dc3545; border-radius: 8px; padding: 4px 10px;">
+                                        <i class="{% if user.is_authenticated and user in product.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-sm add-to-cart-btn flex-grow-1" 
+                                            data-product-id="{{ product.id }}"
+                                            style="background-color: #28a745; color: white; border: none; border-radius: 8px; padding: 4px 10px; font-weight: 600; font-size: 0.8rem;">
+                                        <i class="fas fa-cart-plus me-1"></i>Add
+                                    </button>
+                                    <button class="btn btn-sm flex-grow-1 buy-btn" 
+                                            data-product-id="{{ product.id }}"
+                                            style="background-color: #1e7e34; color: white; border: none; border-radius: 8px; padding: 4px 10px; font-weight: 600; font-size: 0.8rem;">
+                                        <i class="fas fa-bolt me-1"></i>Buy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-center w-100">No products available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <button class="carousel-arrow carousel-arrow-right" id="categoryArrowRight">❯</button>
+        </div>
+        <div class="carousel-controls" id="categoryCarouselControls">
+            {% for product in carousel_products %}
+            <button class="carousel-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></button>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- 3. MIDDLE BANNER -->
+<section class="middle-banner my-4">
+    <a href="{% url 'tortes' %}">
+        <img src="https://xrsm102202001015ss3.lapoire.online/assets/images/492908982_1101628098675267_4430116029399686186_n.jpg" 
+             alt="Middle Banner" class="banner-image w-100" style="max-height: 400px; object-fit: cover; cursor: pointer;">
+    </a>
+</section>
+
+<!-- 4. BEST SELLER -->
+<section class="container py-5">
+    <h2 class="text-center mb-4">Best Seller</h2>
+    
+    <div class="carousel-wrapper">
+        <div class="bestseller-carousel-container">
+            <button class="carousel-arrow carousel-arrow-left" id="bestsellerArrowLeft">❮</button>
+            <div class="bestseller-carousel">
+                <div class="bestseller-track" id="bestsellerCarouselTrack">
+                    {% for product in bestseller_products %}
+                    <div class="bestseller-item-card" data-index="{{ forloop.counter0 }}">
+                        <div class="card product-card h-100 shadow-sm hover-effect" style="border-radius: 12px; border: none;">
+                            <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" 
+                                 style="height: 180px; width: 100%; object-fit: contain; background: #f8f9fa; border-radius: 12px 12px 0 0;" 
+                                 onerror="this.src='https://via.placeholder.com/200x200/28a745/ffffff?text=No+Image'">
+                            <div class="card-body" style="padding: 12px 15px;">
+                                <h6 class="card-title" style="font-weight: 600; font-size: 0.9rem;">{{ product.name }}</h6>
+                                <p class="fw-bold" style="color: #28a745; font-size: 0.95rem;">{{ product.price }} EGP</p>
+
+                                <div class="d-flex gap-2 mt-2 flex-wrap">
+                                    <button class="btn btn-sm like-btn" 
+                                            data-product-id="{{ product.id }}" 
+                                            data-liked="{% if user.is_authenticated and user in product.likes.all %}true{% else %}false{% endif %}"
+                                            style="border: 2px solid #dc3545; background: transparent; color: #dc3545; border-radius: 8px; padding: 4px 10px;">
+                                        <i class="{% if user.is_authenticated and user in product.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-sm add-to-cart-btn flex-grow-1" 
+                                            data-product-id="{{ product.id }}"
+                                            style="background-color: #28a745; color: white; border: none; border-radius: 8px; padding: 4px 10px; font-weight: 600; font-size: 0.8rem;">
+                                        <i class="fas fa-cart-plus me-1"></i>Add
+                                    </button>
+                                    <button class="btn btn-sm flex-grow-1 buy-btn" 
+                                            data-product-id="{{ product.id }}"
+                                            style="background-color: #1e7e34; color: white; border: none; border-radius: 8px; padding: 4px 10px; font-weight: 600; font-size: 0.8rem;">
+                                        <i class="fas fa-bolt me-1"></i>Buy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-center w-100">No bestsellers available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <button class="carousel-arrow carousel-arrow-right" id="bestsellerArrowRight">❯</button>
+        </div>
+        <div class="carousel-controls" id="bestsellerCarouselControls">
+            {% for product in bestseller_products %}
+            <button class="carousel-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></button>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- 5. SWEET SPOT -->
+<section class="sweet-spot-section py-5" style="background-color: #f8f9fa;">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-md-6">
+                <img src="https://xrsm102202001015ss3.lapoire.online/assets/images/Dubai%20photo.png" 
+                     alt="Sweet Spot" class="img-fluid rounded shadow">
+            </div>
+            <div class="col-md-6">
+                <h2>Sweet Spot</h2>
+                <p class="lead">Indulge in our signature Dubai‑inspired chocolate creations, crafted with the finest ingredients for an unforgettable taste.</p>
+                <a href="{% url 'sugar_free' %}" class="btn btn-primary mt-2">Explore Now</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 6. CREATE YOUR OWN CAKE -->
+<section class="create-your-own-cake-section py-5" style="background-color: #ffffff;">
+    <div class="container">
+        <div class="row align-items-center g-4 flex-md-row-reverse">
+            <div class="col-md-6">
+                <img src="https://xrsm102202001015ss3.lapoire.online/assets/images/cake.jpg" 
+                     alt="Create Your Own Cake" class="img-fluid rounded shadow">
+            </div>
+            <div class="col-md-6">
+                <h2>Create Your Own Cake</h2>
+                <p class="lead">Indulge in the sweetest creations, customized cakes crafted just for you.</p>
+                <a href="/Customized-Cake.pdf" class="btn btn-primary mt-2" target="_blank">
+                    Download Menu
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ========== FILTER BUTTONS ========== */
+    .filter-buttons-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    .filter-btn {
+        padding: 10px 25px;
+        border: 2px solid #28a745;
+        background: transparent;
+        color: #28a745;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .filter-btn:hover {
+        background: #28a745 !important;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .filter-btn.active {
+        background: #28a745 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    /* ========== CAROUSEL WRAPPER ========== */
+    .carousel-wrapper {
+        position: relative;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 10px;
+    }
+
+    .category-carousel-container,
+    .bestseller-carousel-container {
+        position: relative;
+        overflow: visible;
+        padding: 20px 0;
+    }
+
+    .category-carousel,
+    .bestseller-carousel {
+        overflow: hidden;
+        position: relative;
+        margin: 0 60px;
+    }
+
+    /* ========== PERFECT CIRCLE ARROWS ========== */
+    .carousel-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 46px;
+        height: 46px;
+        border-radius: 50% !important;
+        border: 2px solid #28a745;
+        background: white;
+        color: #28a745;
+        font-size: 1.3rem;
+        font-weight: 700;
+        cursor: pointer;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        padding: 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1;
+        user-select: none;
+        flex-shrink: 0;
+        overflow: visible !important;
+    }
+
+    .carousel-arrow:hover {
+        background: #28a745;
+        color: white;
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 4px 20px rgba(40, 167, 69, 0.3);
+    }
+
+    .carousel-arrow:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    .carousel-arrow-left {
+        left: -25px;
+    }
+
+    .carousel-arrow-right {
+        right: -25px;
+    }
+
+    /* ========== CAROUSEL ITEMS - FIXED OPACITY (BRIGHTER) ========== */
+    .carousel-track,
+    .bestseller-track {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+        gap: 20px;
+        padding: 10px 0;
+    }
+
+    .carousel-item-card,
+    .bestseller-item-card {
+        flex: 0 0 220px;
+        min-width: 220px;
+        max-width: 220px;
+        transition: all 0.5s ease;
+        opacity: 0.9;          /* Much brighter */
+        transform: scale(0.92);
+        padding: 10px;
+    }
+
+    .carousel-item-card.active,
+    .bestseller-item-card.active {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .carousel-item-card.prev-active,
+    .carousel-item-card.next-active,
+    .bestseller-item-card.prev-active,
+    .bestseller-item-card.next-active {
+        opacity: 0.95;         /* Slightly dimmer but still bright */
+        transform: scale(0.96);
+    }
+
+    /* Navigation Dots */
+    .carousel-controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .carousel-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: none;
+        background: #ddd;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0;
+    }
+
+    .carousel-dot.active {
+        background: #28a745;
+        transform: scale(1.2);
+    }
+
+    .carousel-dot:hover {
+        background: #28a745;
+        opacity: 0.7;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .carousel-item-card,
+        .bestseller-item-card {
+            flex: 0 0 160px;
+            min-width: 160px;
+            max-width: 160px;
+        }
+        .carousel-product-image {
+            height: 130px;
+        }
+        .carousel-product-name {
+            font-size: 0.8rem;
+        }
+        .carousel-product-price {
+            font-size: 0.85rem;
+        }
+        .filter-btn {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+        }
+        .carousel-arrow {
+            width: 38px;
+            height: 38px;
+            font-size: 1rem;
+        }
+        .carousel-arrow-left {
+            left: -18px;
+        }
+        .carousel-arrow-right {
+            right: -18px;
+        }
+        .category-carousel,
+        .bestseller-carousel {
+            margin: 0 40px;
+        }
+        .carousel-wrapper {
+            padding: 0 5px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .carousel-item-card,
+        .bestseller-item-card {
+            flex: 0 0 140px;
+            min-width: 140px;
+            max-width: 140px;
+        }
+        .carousel-product-image {
+            height: 110px;
+        }
+        .filter-btn {
+            padding: 6px 12px;
+            font-size: 0.7rem;
+        }
+        .carousel-arrow {
+            width: 30px;
+            height: 30px;
+            font-size: 0.8rem;
+        }
+        .carousel-arrow-left {
+            left: -12px;
+        }
+        .carousel-arrow-right {
+            right: -12px;
+        }
+        .category-carousel,
+        .bestseller-carousel {
+            margin: 0 25px;
+        }
+        .carousel-wrapper {
+            padding: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ========== CATEGORY CAROUSEL ==========
+    const categoryTrack = document.getElementById('categoryCarouselTrack');
+    let categoryIndex = 0;
+    let categoryTotal = 0;
+    let categoryAutoSlide;
+
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const categoryArrowLeft = document.getElementById('categoryArrowLeft');
+    const categoryArrowRight = document.getElementById('categoryArrowRight');
+
+    function fetchProductsByCategory(filter) {
+        let url = `/api/products/?category__slug=${filter}`;
+        return fetch(url).then(res => res.json());
+    }
+
+    function rebuildCategoryCarousel(products, filter) {
+        categoryTrack.innerHTML = '';
+        const controls = document.getElementById('categoryCarouselControls');
+        controls.innerHTML = '';
+
+        if (products.length === 0) {
+            categoryTrack.innerHTML = '<p class="text-center w-100">No products available for this category.</p>';
+            categoryTotal = 0;
+            return;
+        }
+
+        products.forEach((product, index) => {
+            const item = document.createElement('div');
+            item.className = 'carousel-item-card';
+            item.dataset.index = index;
+            item.innerHTML = `
+                <div class="card product-card h-100 shadow-sm hover-effect" style="border-radius: 12px; border: none;">
+                    <img src="${product.image_url}" class="card-img-top" alt="${product.name}" 
+                         style="height: 180px; width: 100%; object-fit: contain; background: #f8f9fa; border-radius: 12px 12px 0 0;" 
+                         onerror="this.src='https://via.placeholder.com/200x200/28a745/ffffff?text=No+Image'">
+                    <div class="card-body" style="padding: 12px 15px;">
+                        <h6 class="card-title" style="font-weight: 600; font-size: 0.9rem;">${product.name}</h6>
+                        <p class="fw-bold" style="color: #28a745; font-size: 0.95rem;">${product.price} EGP</p>
+                        <div class="d-flex gap-2 mt-2 flex-wrap">
+                            <button class="btn btn-sm like-btn" 
+                                    data-product-id="${product.id}" 
+                                    data-liked="${product.liked_by_user || false}"
+                                    style="border: 2px solid #dc3545; background: transparent; color: #dc3545; border-radius: 8px; padding: 4px 10px;">
+                                <i class="${product.liked_by_user ? 'fas' : 'far'} fa-heart"></i>
+                            </button>
+                            <button class="btn btn-sm add-to-cart-btn flex-grow-1" 
+                                    data-product-id="${product.id}"
+                                    style="background-color: #28a745; color: white; border: none; border-radius: 8px; padding: 4px 10px; font-weight: 600; font-size: 0.8rem;">
+                                <i class="fas fa-cart-plus me-1"></i>Add
+                            </button>
+                            <button class="btn btn-sm flex-grow-1 buy-btn" 
+                                    data-product-id="${product.id}"
+                                    style="background-color: #1e7e34; color: white; border: none; border-radius: 8px; padding: 4px 10px; font-weight: 600; font-size: 0.8rem;">
+                                <i class="fas fa-bolt me-1"></i>Buy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            categoryTrack.appendChild(item);
+
+            const dot = document.createElement('button');
+            dot.className = 'carousel-dot' + (index === 0 ? ' active' : '');
+            dot.dataset.index = index;
+            dot.addEventListener('click', function() {
+                goToCategorySlide(parseInt(this.dataset.index));
+                resetCategoryAutoSlide();
+            });
+            controls.appendChild(dot);
+        });
+
+        categoryTotal = products.length;
+        categoryIndex = 0;
+
+        filterButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filter);
+        });
+
+        setTimeout(updateCategoryCarousel, 100);
+        resetCategoryAutoSlide();
+    }
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            categoryTrack.innerHTML = '<p class="text-center w-100">Loading...</p>';
+            fetchProductsByCategory(filter)
+                .then(products => rebuildCategoryCarousel(products, filter))
+                .catch(err => {
+                    console.error('Error:', err);
+                    categoryTrack.innerHTML = '<p class="text-center w-100 text-danger">Error loading products.</p>';
+                });
+        });
+    });
+
+    function updateCategoryCarousel() {
+        const items = categoryTrack.querySelectorAll('.carousel-item-card');
+        if (items.length === 0) return;
+        categoryTotal = items.length;
+        const count = getVisibleCount();
+        const itemWidth = items[0].offsetWidth + 20;
+        const totalWidth = itemWidth * count;
+        const centerOffset = (totalWidth - itemWidth) / 2;
+        const offset = -(categoryIndex * itemWidth) + centerOffset;
+        categoryTrack.style.transform = `translateX(${offset}px)`;
+        
+        items.forEach((item, index) => {
+            item.classList.remove('active', 'prev-active', 'next-active');
+            const diff = index - categoryIndex;
+            if (diff === 0) {
+                item.classList.add('active');
+            } else if (diff === -1 || (categoryIndex === 0 && index === categoryTotal - 1)) {
+                item.classList.add('prev-active');
+            } else if (diff === 1 || (categoryIndex === categoryTotal - 1 && index === 0)) {
+                item.classList.add('next-active');
+            }
+        });
+        
+        document.querySelectorAll('#categoryCarouselControls .carousel-dot').forEach((dot, index) => {
+            dot.classList.toggle('active', index === categoryIndex);
+        });
+    }
+
+    function goToCategorySlide(index) {
+        if (categoryTotal === 0) return;
+        categoryIndex = index;
+        if (categoryIndex < 0) categoryIndex = categoryTotal - 1;
+        if (categoryIndex >= categoryTotal) categoryIndex = 0;
+        updateCategoryCarousel();
+    }
+
+    function nextCategorySlide() {
+        goToCategorySlide(categoryIndex + 1);
+        resetCategoryAutoSlide();
+    }
+
+    function prevCategorySlide() {
+        goToCategorySlide(categoryIndex - 1);
+        resetCategoryAutoSlide();
+    }
+
+    function startCategoryAutoSlide() {
+        if (categoryAutoSlide) clearInterval(categoryAutoSlide);
+        categoryAutoSlide = setInterval(nextCategorySlide, 1500);
+    }
+
+    function resetCategoryAutoSlide() {
+        clearInterval(categoryAutoSlide);
+        startCategoryAutoSlide();
+    }
+
+    categoryArrowLeft.addEventListener('click', prevCategorySlide);
+    categoryArrowRight.addEventListener('click', nextCategorySlide);
+
+    const categoryContainer = document.querySelector('.category-carousel-container');
+    if (categoryContainer) {
+        categoryContainer.addEventListener('mouseenter', function() { clearInterval(categoryAutoSlide); });
+        categoryContainer.addEventListener('mouseleave', function() { startCategoryAutoSlide(); });
+    }
+
+    // ========== BESTSELLER CAROUSEL ==========
+    const bestsellerTrack = document.getElementById('bestsellerCarouselTrack');
+    let bestsellerIndex = 0;
+    let bestsellerTotal = 0;
+    let bestsellerAutoSlide;
+
+    const bestsellerArrowLeft = document.getElementById('bestsellerArrowLeft');
+    const bestsellerArrowRight = document.getElementById('bestsellerArrowRight');
+
+    function updateBestsellerCarousel() {
+        const items = bestsellerTrack.querySelectorAll('.bestseller-item-card');
+        if (items.length === 0) return;
+        bestsellerTotal = items.length;
+        const count = getVisibleCount();
+        const itemWidth = items[0].offsetWidth + 20;
+        const totalWidth = itemWidth * count;
+        const centerOffset = (totalWidth - itemWidth) / 2;
+        const offset = -(bestsellerIndex * itemWidth) + centerOffset;
+        bestsellerTrack.style.transform = `translateX(${offset}px)`;
+        
+        items.forEach((item, index) => {
+            item.classList.remove('active', 'prev-active', 'next-active');
+            const diff = index - bestsellerIndex;
+            if (diff === 0) {
+                item.classList.add('active');
+            } else if (diff === -1 || (bestsellerIndex === 0 && index === bestsellerTotal - 1)) {
+                item.classList.add('prev-active');
+            } else if (diff === 1 || (bestsellerIndex === bestsellerTotal - 1 && index === 0)) {
+                item.classList.add('next-active');
+            }
+        });
+        
+        document.querySelectorAll('#bestsellerCarouselControls .carousel-dot').forEach((dot, index) => {
+            dot.classList.toggle('active', index === bestsellerIndex);
+        });
+    }
+
+    function goToBestsellerSlide(index) {
+        const items = bestsellerTrack.querySelectorAll('.bestseller-item-card');
+        if (items.length === 0) return;
+        bestsellerTotal = items.length;
+        bestsellerIndex = index;
+        if (bestsellerIndex < 0) bestsellerIndex = bestsellerTotal - 1;
+        if (bestsellerIndex >= bestsellerTotal) bestsellerIndex = 0;
+        updateBestsellerCarousel();
+    }
+
+    function nextBestsellerSlide() {
+        goToBestsellerSlide(bestsellerIndex + 1);
+        resetBestsellerAutoSlide();
+    }
+
+    function prevBestsellerSlide() {
+        goToBestsellerSlide(bestsellerIndex - 1);
+        resetBestsellerAutoSlide();
+    }
+
+    function startBestsellerAutoSlide() {
+        if (bestsellerAutoSlide) clearInterval(bestsellerAutoSlide);
+        bestsellerAutoSlide = setInterval(nextBestsellerSlide, 1500);
+    }
+
+    function resetBestsellerAutoSlide() {
+        clearInterval(bestsellerAutoSlide);
+        startBestsellerAutoSlide();
+    }
+
+    bestsellerArrowLeft.addEventListener('click', prevBestsellerSlide);
+    bestsellerArrowRight.addEventListener('click', nextBestsellerSlide);
+
+    document.querySelectorAll('#bestsellerCarouselControls .carousel-dot').forEach(dot => {
+        dot.addEventListener('click', function() {
+            goToBestsellerSlide(parseInt(this.dataset.index));
+            resetBestsellerAutoSlide();
+        });
+    });
+
+    const bestsellerContainer = document.querySelector('.bestseller-carousel-container');
+    if (bestsellerContainer) {
+        bestsellerContainer.addEventListener('mouseenter', function() { clearInterval(bestsellerAutoSlide); });
+        bestsellerContainer.addEventListener('mouseleave', function() { startBestsellerAutoSlide(); });
+    }
+
+    // ========== SHARED FUNCTIONS ==========
+    function getVisibleCount() {
+        if (window.innerWidth <= 480) return 1;
+        if (window.innerWidth <= 768) return 2;
+        return 3;
+    }
+
+    // ========== INITIALIZE ==========
+    function initCarousels() {
+        const categoryItems = categoryTrack.querySelectorAll('.carousel-item-card');
+        categoryTotal = categoryItems.length;
+        if (categoryTotal > 0) {
+            categoryIndex = 0;
+            updateCategoryCarousel();
+            startCategoryAutoSlide();
+        }
+
+        const bestsellerItems = bestsellerTrack.querySelectorAll('.bestseller-item-card');
+        bestsellerTotal = bestsellerItems.length;
+        if (bestsellerTotal > 0) {
+            bestsellerIndex = 0;
+            updateBestsellerCarousel();
+            startBestsellerAutoSlide();
+        }
+    }
+
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            updateCategoryCarousel();
+            updateBestsellerCarousel();
+        }, 200);
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            prevCategorySlide();
+            resetCategoryAutoSlide();
+        } else if (e.key === 'ArrowRight') {
+            nextCategorySlide();
+            resetCategoryAutoSlide();
+        }
+    });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+    if (categoryContainer) {
+        categoryContainer.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        categoryContainer.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) { nextCategorySlide(); } else { prevCategorySlide(); }
+                resetCategoryAutoSlide();
+            }
+        });
+    }
+
+    if (bestsellerContainer) {
+        bestsellerContainer.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        bestsellerContainer.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) { nextBestsellerSlide(); } else { prevBestsellerSlide(); }
+                resetBestsellerAutoSlide();
+            }
+        });
+    }
+
+    setTimeout(initCarousels, 100);
+});
+</script>
+{% endblock %}

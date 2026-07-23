@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Cart - MagdisBakery{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="bg-light py-2">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active">Your Cart</li>
+        </ol>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="container py-4">
+    <div class="row">
+        <!-- ====== LEFT COLUMN – CART ITEMS ====== -->
+        <div class="col-lg-8">
+            <h2 class="fw-bold mb-4" style="color: #28a745;">Your Cart</h2>
+
+            <!-- Cart Items Container -->
+            <div id="cartItemsContainer">
+                <div class="text-center py-5" id="cartLoading">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading your cart...</p>
+                </div>
+            </div>
+
+            <!-- Remove All Button -->
+            <div id="removeAllContainer" class="mt-3" style="display: none;">
+                <button id="removeAllBtn" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-trash-alt me-1"></i> Remove All
+                </button>
+            </div>
+
+            <!-- Special Note -->
+            <div class="mt-4">
+                <label for="cartNote" class="form-label fw-semibold">Any special note? <span class="text-muted small">(optional)</span></label>
+                <textarea id="cartNote" class="form-control" rows="3" placeholder="Enter any specific requests..." style="border-radius: 10px; border: 1px solid #dee2e6; resize: vertical;"></textarea>
+            </div>
+        </div>
+
+        <!-- ====== RIGHT COLUMN – ORDER SUMMARY ====== -->
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="card shadow-sm" style="border-radius: 16px; border: none; padding: 24px; background: #f8f9fa;">
+                <h4 class="fw-bold mb-3" style="color: #28a745;">Order Summary</h4>
+                <hr style="border-color: #28a745; border-width: 2px;">
+
+                <!-- Item Prices List -->
+                <div id="orderItemsList" class="mb-3">
+                    <p class="text-muted small">Your cart is empty</p>
+                </div>
+
+                <!-- Total -->
+                <div class="d-flex justify-content-between fw-bold fs-5 pt-2 border-top">
+                    <span>Total</span>
+                    <span id="orderTotal" style="color: #28a745;">0.00 EGP</span>
+                </div>
+
+                <!-- Delivery Info -->
+                <div class="mt-3">
+                    <p class="small text-muted mb-1"><i class="fas fa-clock me-1"></i> Delivery within 45 - 60 mins</p>
+                    <p class="small text-muted mb-0"><i class="fas fa-info-circle me-1"></i> Delivery note: Orders may be delayed due to rush hours</p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-grid gap-3 mt-4">
+                    <a href="{% url 'checkout' %}" id="checkoutBtn" class="btn btn-outline-success py-2 fw-semibold" style="border-radius: 10px; border-width: 2px;">
+                        Proceed to Checkout
+                    </a>
+                    <a href="{% url 'home' %}" class="btn btn-success py-2 fw-semibold" style="border-radius: 10px; border: 2px solid #28a745; color: white;">
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cartItemsContainer = document.getElementById('cartItemsContainer');
+    const orderItemsList = document.getElementById('orderItemsList');
+    const orderTotal = document.getElementById('orderTotal');
+    const removeAllContainer = document.getElementById('removeAllContainer');
+    const removeAllBtn = document.getElementById('removeAllBtn');
+    const cartNote = document.getElementById('cartNote');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+
+    // Load cart note from localStorage
+    const savedNote = localStorage.getItem('cartNote');
+    if (savedNote) {
+        cartNote.value = savedNote;
+    }
+
+    // Save note on change
+    cartNote.addEventListener('input', function() {
+        localStorage.setItem('cartNote', this.value);
+    });
+
+    function getCartId() {
+        return localStorage.getItem('cartId');
+    }
+
+    function renderCart() {
+        const cartId = getCartId();
+        if (!cartId) {
+            showEmptyCart();
+            return;
+        }
+
+        fetch(`/api/carts/${cartId}/`)
+            .then(res => {
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        localStorage.removeItem('cartId');
+                        showEmptyCart();
+                        return null;
+                    }
+                    throw new Error('Failed to fetch cart');
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (!data) return;
+                if (data.items && data.items.length > 0) {
+                    renderCartItems(data.items);
+                    renderOrderSummary(data.items);
+                    removeAllContainer.style.display = 'block';
+                } else {
+                    showEmptyCart();
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching cart:', err);
+                cartItemsContainer.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #dc3545; opacity: 0.5;"></i>
+                        <p class="mt-3 text-danger">Error loading your cart. Please try again.</p>
+                    </div>
+                `;
+                orderItemsList.innerHTML = '<p class="text-muted small">Unable to load items</p>';
+                orderTotal.textContent = '0.00 EGP';
+                removeAllContainer.style.display = 'none';
+            });
+    }
+
+    function showEmptyCart() {
+        cartItemsContainer.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart" style="font-size: 4rem; color: #28a745; opacity: 0.3;"></i>
+                <h4 class="mt-3" style="color: #6c757d;">Your cart is empty</h4>
+                <p class="text-muted">Looks like you haven't added any items yet.</p>
+                <a href="{% url 'home' %}" class="btn btn-primary mt-2" style="background-color: #28a745; border: none;">Start Shopping</a>
+            </div>
+        `;
+        orderItemsList.innerHTML = '<p class="text-muted small">No items in cart</p>';
+        orderTotal.textContent = '0.00 EGP';
+        removeAllContainer.style.display = 'none';
+    }
+
+    function renderCartItems(items) {
+        let html = '';
+        items.forEach(item => {
+            const totalPrice = (item.quantity * item.product.price).toFixed(2);
+            html += `
+                <div class="cart-item d-flex align-items-center py-3 border-bottom" 
+                     data-item-id="${item.id}" 
+                     data-product-id="${item.product.id}">
+                    <img src="${item.product.image_url || 'https://via.placeholder.com/80/28a745/ffffff?text=No+Image'}" 
+                         alt="${item.product.name}" 
+                         class="cart-item-img rounded"
+                         style="width: 80px; height: 80px; object-fit: contain; background: #f8f9fa; flex-shrink: 0;">
+                    <div class="cart-item-info ms-3 flex-grow-1">
+                        <h6 class="fw-semibold mb-1" style="color: #212529;">${item.product.name}</h6>
+                        <p class="fw-bold mb-2" style="color: #28a745; font-size: 0.95rem;">${item.product.price} EGP</p>
+                        <div class="cart-item-controls d-flex align-items-center gap-2">
+                            <button class="cart-qty-minus btn btn-outline-secondary btn-sm" data-item-id="${item.id}" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;">−</button>
+                            <span class="qty fw-semibold" style="min-width: 24px; text-align: center;">${item.quantity}</span>
+                            <button class="cart-qty-plus btn btn-outline-secondary btn-sm" data-item-id="${item.id}" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;">+</button>
+                            <button class="cart-item-remove btn btn-sm text-danger ms-2" data-item-id="${item.id}" style="background: none; border: none; font-size: 1.2rem;">&times;</button>
+                        </div>
+                    </div>
+                    <div class="cart-item-total text-end" style="min-width: 80px;">
+                        <p class="fw-bold mb-0" style="color: #28a745;">${totalPrice} EGP</p>
+                    </div>
+                </div>
+            `;
+        });
+        cartItemsContainer.innerHTML = html;
+
+        // Attach events
+        document.querySelectorAll('.cart-qty-minus').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemId = this.dataset.itemId;
+                updateCartItemQuantity(itemId, -1);
+            });
+        });
+        document.querySelectorAll('.cart-qty-plus').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemId = this.dataset.itemId;
+                updateCartItemQuantity(itemId, 1);
+            });
+        });
+        document.querySelectorAll('.cart-item-remove').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemId = this.dataset.itemId;
+                removeCartItem(itemId);
+            });
+        });
+    }
+
+    function renderOrderSummary(items) {
+        let html = '';
+        let total = 0;
+        items.forEach(item => {
+            const itemTotal = item.quantity * item.product.price;
+            total += itemTotal;
+            html += `
+                <div class="d-flex justify-content-between small mb-1">
+                    <span>${item.product.name} × ${item.quantity}</span>
+                    <span style="color: #28a745;">${itemTotal.toFixed(2)} EGP</span>
+                </div>
+            `;
+        });
+        orderItemsList.innerHTML = html;
+        orderTotal.textContent = total.toFixed(2) + ' EGP';
+    }
+
+    // ====== FIXED: proper increment/decrement using add_item ======
+    function updateCartItemQuantity(itemId, delta) {
+        const cartId = getCartId();
+        if (!cartId) return;
+
+        const itemElement = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+        if (!itemElement) return;
+        const qtySpan = itemElement.querySelector('.qty');
+        if (!qtySpan) return;
+        const productId = itemElement.dataset.productId;
+        if (!productId) return;
+
+        let currentQty = parseInt(qtySpan.textContent, 10) || 0;
+        let newQty = currentQty + delta;
+
+        // If new quantity is zero or less, delete the item
+        if (newQty <= 0) {
+            removeCartItem(itemId);
+            return;
+        }
+
+        if (delta > 0) {
+            // PLUS: simply add 1 via add_item (it adds the sent quantity)
+            fetch(`/api/carts/${cartId}/add_item/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: parseInt(productId), quantity: delta })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to update quantity');
+                return res.json();
+            })
+            .then(() => {
+                renderCart();
+                updateCartCount(getCartId());
+            })
+            .catch(err => console.error('Error updating cart item:', err));
+        } else {
+            // MINUS: since add_item only adds, we must delete and re-add with new quantity
+            // First delete the item
+            fetch(`/api/carts/${cartId}/items/${itemId}/`, {
+                method: 'DELETE'
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to remove item');
+                // Then add back with the new (reduced) quantity
+                return fetch(`/api/carts/${cartId}/add_item/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: parseInt(productId), quantity: newQty })
+                });
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to re-add item');
+                return res.json();
+            })
+            .then(() => {
+                renderCart();
+                updateCartCount(getCartId());
+            })
+            .catch(err => console.error('Error updating cart item:', err));
+        }
+    }
+
+    function removeCartItem(itemId) {
+        const cartId = getCartId();
+        if (!cartId) return;
+
+        fetch(`/api/carts/${cartId}/items/${itemId}/`, {
+            method: 'DELETE'
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to remove');
+            renderCart();
+            updateCartCount(cartId);
+        })
+        .catch(err => console.error('Error removing cart item:', err));
+    }
+
+    // Remove All
+    removeAllBtn.addEventListener('click', function() {
+        const cartId = getCartId();
+        if (!cartId) return;
+
+        if (!confirm('Are you sure you want to remove all items from your cart?')) return;
+
+        fetch(`/api/carts/${cartId}/clear/`, {
+            method: 'DELETE'
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to clear cart');
+            renderCart();
+            updateCartCount(null);
+            localStorage.removeItem('cartId');
+        })
+        .catch(err => console.error('Error clearing cart:', err));
+    });
+
+    function updateCartCount(cartId) {
+        const badge = document.querySelector('.cart-count');
+        if (!badge) return;
+
+        if (!cartId) {
+            badge.textContent = '0';
+            badge.style.display = 'none';
+            return;
+        }
+
+        fetch(`/api/carts/${cartId}/`)
+            .then(res => {
+                if (!res.ok) {
+                    badge.textContent = '0';
+                    badge.style.display = 'none';
+                    return null;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (!data) return;
+                const count = data.items ? data.items.reduce((sum, i) => sum + i.quantity, 0) : 0;
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'inline-block' : 'none';
+            })
+            .catch(() => {
+                badge.textContent = '0';
+                badge.style.display = 'none';
+            });
+    }
+
+    // Initial render
+    renderCart();
+});
+</script>
+{% endblock %}

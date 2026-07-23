@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Step 2 - MagdisBakery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .register-card {
+            max-width: 480px;
+            width: 100%;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            text-align: center;
+            margin: 20px auto;
+        }
+        .register-card .logo {
+            max-height: 160px;
+            width: auto;
+            margin-bottom: 10px;
+        }
+        .register-card h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #28a745;
+            margin-bottom: 4px;
+        }
+        .register-card .subtitle {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+        .register-card .form-control {
+            border-radius: 10px;
+            padding: 12px 16px;
+            border: 1px solid #dee2e6;
+            transition: border-color 0.2s;
+        }
+        .register-card .form-control:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40,167,69,0.15);
+        }
+        .register-card .input-group-text {
+            background: white;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+            padding: 0 16px;
+            color: #6c757d;
+        }
+        .register-card .input-group-text:hover {
+            color: #28a745;
+        }
+        .btn-primary {
+            background: #28a745;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover {
+            background: #1e7e34;
+        }
+        .btn-primary:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .register-card .signin-link {
+            color: #28a745;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .register-card .signin-link:hover {
+            text-decoration: underline;
+        }
+        .alert {
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        .footer {
+            background-color: #1a1a1a !important;
+            width: 100%;
+            margin-top: auto;
+            padding-top: 3rem !important;
+            padding-bottom: 2rem !important;
+        }
+        .footer a:hover {
+            color: #28a745 !important;
+        }
+        .privacy-link {
+            color: #0d6efd !important;
+            text-decoration: underline !important;
+            cursor: pointer;
+        }
+        .privacy-link:hover {
+            color: #0a58ca !important;
+        }
+        .modal-body pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .checkbox-label {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="register-card">
+    <a href="{% url 'home' %}">
+        <img src="/logo/" alt="MagdisBakery" class="logo">
+    </a>
+
+    <h1>MagdisBakery</h1>
+    <p class="subtitle">Please continue your information here.</p>
+
+    <form id="step2Form" novalidate>
+        {% csrf_token %}
+        <div class="mb-3 text-start">
+            <label for="username" class="form-label fw-semibold">Create Username</label>
+            <input type="text" class="form-control" id="username" placeholder="Choose a username" required>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label for="password" class="form-label fw-semibold">Create Password</label>
+            <div class="input-group">
+                <input type="password" class="form-control" id="password" placeholder="Enter a password" required>
+                <span class="input-group-text" id="togglePassword1" role="button">
+                    <i class="fa-regular fa-eye-slash" id="passwordIcon1"></i>
+                </span>
+            </div>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label for="confirmPassword" class="form-label fw-semibold">Confirm Password</label>
+            <div class="input-group">
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Re-enter your password" required>
+                <span class="input-group-text" id="togglePassword2" role="button">
+                    <i class="fa-regular fa-eye-slash" id="passwordIcon2"></i>
+                </span>
+            </div>
+        </div>
+
+        <!-- PRIVACY POLICY CHECKBOX -->
+        <div class="mb-3 text-start">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="privacyCheck" required>
+                <label class="form-check-label checkbox-label" for="privacyCheck">
+                    I have read and agreed to the 
+                    <a href="#" class="privacy-link" data-bs-toggle="modal" data-bs-target="#privacyModal">
+                        Privacy Policy
+                    </a> 
+                    and terms of conditions of MagdiBakery.
+                </label>
+            </div>
+            <div id="privacyError" class="invalid-feedback" style="display: none; font-size: 0.85rem;">
+                You must agree to the Privacy Policy to register.
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" id="registerBtn" disabled>Register</button>
+    </form>
+
+    <div id="step2Error" class="alert alert-danger d-none mt-3"></div>
+    <div id="step2Success" class="alert alert-success d-none mt-3"></div>
+
+    <p class="mt-3 small text-muted">
+        Already have an account? <a href="{% url 'signin' %}" class="signin-link">Sign in here</a>
+    </p>
+</div>
+
+<!-- ===== PRIVACY POLICY MODAL ===== -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre>
+PRIVACY POLICY
+
+Last Updated: July 13, 2026
+
+Welcome to MagdiBakery ("MagdiBakery", "we", "our", or "us").
+
+We are committed to protecting your privacy and handling your personal information responsibly. This Privacy Policy explains what information we collect, how we use it, and the choices available to you when using our website.
+
+By creating an account, placing an order, or using our services, you agree to the practices described in this Privacy Policy.
+
+1. Information We Collect
+
+When you create an account or place an order through MagdiBakery, we may collect:
+
+• First Name and Last Name
+• Email Address
+• Phone Number
+• Shipping Address
+• Billing Address (if applicable)
+• Account Login Information
+• Order and Purchase Information
+• Customer Support Communications
+
+We may also automatically collect technical information such as:
+
+• IP Address
+• Browser Type
+• Device Information
+• Date and Time of Website Access
+
+2. How We Use Your Information
+
+We use your information to:
+
+• Create and manage customer accounts
+• Process and fulfill orders
+• Arrange delivery of products
+• Process payments through authorized payment providers
+• Send order confirmations and order updates
+• Respond to customer inquiries and support requests
+• Prevent fraud and unauthorized activity
+• Improve the functionality and security of our website
+• Comply with legal obligations
+
+3. Payment Information
+
+Payments may be processed through third-party payment providers, including Paymob, banks, card processors, and other authorized payment services.
+
+MagdiBakery does not store complete credit card or debit card information on its own servers. Payment information is handled by the relevant payment provider in accordance with its own privacy and security policies.
+
+4. Sharing of Information
+
+We do not sell customer personal information.
+
+We may share information with:
+
+• Payment service providers
+• Shipping and delivery partners
+• Website hosting providers
+• Technical service providers assisting in website operation
+• Government authorities or regulators when required by law
+
+Information is shared only when reasonably necessary for providing services or complying with legal obligations.
+
+5. Data Security
+
+We implement reasonable technical and organizational measures designed to protect personal information against unauthorized access, misuse, loss, disclosure, or alteration.
+
+However, no internet transmission or electronic storage method can be guaranteed to be completely secure.
+
+6. Data Retention
+
+We retain personal information only for as long as necessary to:
+
+• Maintain customer accounts
+• Fulfill orders and provide services
+• Meet legal and accounting requirements
+• Resolve disputes and enforce agreements
+
+When information is no longer required, it may be securely deleted or anonymized.
+
+7. Cookies
+
+MagdiBakery may use cookies and similar technologies to improve website functionality and user experience.
+
+Cookies help us remember user preferences, maintain login sessions, and improve website performance.
+
+Users may disable cookies through browser settings, although certain website features may not function properly.
+
+8. International Orders
+
+MagdiBakery may accept orders from customers located in different countries where permitted by applicable law and operational capabilities.
+
+By using our services, customers understand that information may be processed in jurisdictions different from their own when necessary to complete orders and provide services.
+
+9. Your Rights
+
+Subject to applicable law, users may request:
+
+• Access to personal information held by us
+• Correction of inaccurate information
+• Deletion of personal information where legally permitted
+• Restriction of certain processing activities
+• Information regarding how their data is used
+
+Requests may be submitted using the contact information below.
+
+10. Children's Privacy
+
+MagdiBakery services are not intended for children under 18 years of age.
+
+We do not knowingly collect personal information from children.
+
+11. Changes to This Privacy Policy
+
+We reserve the right to modify this Privacy Policy at any time.
+
+Any updates will be posted on this page together with a revised "Last Updated" date.
+
+Continued use of the website after changes are published constitutes acceptance of the revised Privacy Policy.
+
+12. Contact Information
+
+If you have questions regarding this Privacy Policy or wish to exercise your privacy rights, please contact us:
+
+MagdiBakery
+
+Email: magdibakery@gmail.com
+
+Website: www.magdibakery.com
+
+Customer Support: Available through the website contact form.
+                </pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer bg-dark text-white">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <h5 class="mb-3"><i class="fas fa-birthday-cake me-2"></i>MagdisBakery</h5>
+                <p class="text-secondary small">Freshly baked goods delivered with love. Your one-stop shop for premium pastries, cakes, and desserts.</p>
+                <div class="mt-3">
+                    <a href="#" class="text-white me-2"><i class="fab fa-facebook fa-lg"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-tiktok fa-lg"></i></a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted">Quick Links</h6>
+                <ul class="list-unstyled small">
+                    <li><a class="link-light text-decoration-none" href="{% url 'home' %}">Home</a></li>
+                    <li><a class="link-light text-decoration-none" href="#">Catering Services</a></li>
+                    <li><a class="link-light text-decoration-none" href="#">Terms & Conditions</a></li>
+                    <li><a class="link-light text-decoration-none" href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted">Contact</h6>
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-phone me-2 text-secondary"></i><span class="text-secondary">+20 10 0000 0000</span></li>
+                    <li><i class="fas fa-envelope me-2 text-secondary"></i><span class="text-secondary">info@magdisbakery.com</span></li>
+                    <li><i class="fas fa-map-marker-alt me-2 text-secondary"></i><span class="text-secondary">Cairo, Egypt</span></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary my-4">
+        <p class="text-center text-secondary small mb-0">&copy; 2026 MagdisBakery. Created by Youssef Magdi</p>
+    </div>
+</footer>
+
+<script>
+    function getCSRFToken() {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+        return cookie ? cookie.split('=')[1] : '';
+    }
+
+    // Toggle password visibility
+    function setupToggle(btnId, inputId, iconId) {
+        const btn = document.getElementById(btnId);
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        btn.addEventListener('click', function() {
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
+    }
+
+    setupToggle('togglePassword1', 'password', 'passwordIcon1');
+    setupToggle('togglePassword2', 'confirmPassword', 'passwordIcon2');
+
+    const privacyCheck = document.getElementById('privacyCheck');
+    const registerBtn = document.getElementById('registerBtn');
+    const privacyError = document.getElementById('privacyError');
+
+    privacyCheck.addEventListener('change', function() {
+        if (this.checked) {
+            registerBtn.disabled = false;
+            privacyError.style.display = 'none';
+        } else {
+            registerBtn.disabled = true;
+        }
+    });
+
+    const form = document.getElementById('step2Form');
+    const errorDiv = document.getElementById('step2Error');
+    const successDiv = document.getElementById('step2Success');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (!privacyCheck.checked) {
+            privacyError.style.display = 'block';
+            registerBtn.disabled = true;
+            return;
+        } else {
+            privacyError.style.display = 'none';
+        }
+
+        errorDiv.classList.add('d-none');
+        successDiv.classList.add('d-none');
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const confirm = document.getElementById('confirmPassword').value;
+
+        if (password !== confirm) {
+            errorDiv.textContent = 'Passwords do not match. Please try again.';
+            errorDiv.classList.remove('d-none');
+            return;
+        }
+
+        if (password.length < 6) {
+            errorDiv.textContent = 'Password must be at least 6 characters long.';
+            errorDiv.classList.remove('d-none');
+            return;
+        }
+
+        const firstName = localStorage.getItem('reg_first_name') || '';
+        const lastName = localStorage.getItem('reg_last_name') || '';
+        const email = localStorage.getItem('reg_email') || '';
+
+        const payload = {
+            username: username,
+            password: password,
+            email: email,
+            first_name: firstName,
+            last_name: lastName
+        };
+
+        fetch('/auth/users/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(err => {
+                    throw new Error(JSON.stringify(err));
+                });
+            }
+            return res.json();
+        })
+        .then(data => {
+            successDiv.textContent = 'Registration successful! Redirecting to sign in...';
+            successDiv.classList.remove('d-none');
+
+            localStorage.removeItem('reg_first_name');
+            localStorage.removeItem('reg_last_name');
+            localStorage.removeItem('reg_email');
+
+            setTimeout(() => {
+                window.location.href = "{% url 'signin' %}";
+            }, 2000);
+        })
+        .catch(err => {
+            try {
+                const errorData = JSON.parse(err.message);
+                const messages = Object.values(errorData).flat().join(' ');
+                errorDiv.textContent = messages || 'Registration failed. Please try again.';
+            } catch {
+                errorDiv.textContent = 'Registration failed. Please try again.';
+            }
+            errorDiv.classList.remove('d-none');
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

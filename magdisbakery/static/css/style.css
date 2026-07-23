@@ -1,0 +1,333 @@
+/* ========== COLOR PALETTE ========== */
+:root {
+    --primary-green: #28a745;
+    --dark-green: #1e7e34;
+    --light-green: #e8f5e9;
+    --white: #ffffff;
+    --dark: #212529;
+    --gray: #6c757d;
+    --light-gray: #f8f9fa;
+}
+
+/* ========== GLOBAL ========== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--dark);
+    background-color: var(--white);
+}
+
+.text-primary {
+    color: var(--primary-green) !important;
+}
+.bg-primary {
+    background-color: var(--primary-green) !important;
+}
+.btn-primary {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+}
+.btn-primary:hover {
+    background-color: var(--dark-green);
+    border-color: var(--dark-green);
+}
+.btn-outline-primary {
+    color: var(--primary-green);
+    border-color: var(--primary-green);
+}
+.btn-outline-primary:hover {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+}
+.border-primary {
+    border-color: var(--primary-green) !important;
+}
+a.text-primary:hover {
+    color: var(--dark-green) !important;
+}
+
+/* ========== TOP BAR ========== */
+.top-bar {
+    background-color: var(--light-gray);
+    border-bottom: 1px solid #dee2e6;
+    font-size: 0.875rem;
+    padding: 8px 0;
+}
+.top-bar a {
+    color: var(--gray);
+    text-decoration: none;
+}
+.top-bar a:hover {
+    color: var(--primary-green);
+}
+.top-bar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.top-bar .left-items {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.top-bar .right-items {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* ========== HAMBURGER TOGGLER (visible only on mobile) ========== */
+.navbar-toggler {
+    border: 2px solid var(--primary-green) !important;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2840,167,69,1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* ========== NAVBAR (RESTORED GREEN & BOLD) ========== */
+.navbar {
+    background-color: white;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+}
+.navbar .nav-link {
+    color: #28a745 !important;
+    font-weight: 700 !important;
+    text-decoration: none;
+    font-size: 2rem;
+    padding: 0.5rem 1rem;
+}
+.navbar .nav-link:hover {
+    color: #1e7e34 !important;
+}
+.navbar .dropdown-toggle {
+    color: #28a745 !important;
+    font-weight: 700 !important;
+    font-size: 2rem;
+}
+.navbar .dropdown-toggle:hover {
+    color: #1e7e34 !important;
+}
+.navbar .dropdown-menu {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 0;
+}
+.navbar .dropdown-item {
+    color: #28a745 !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+    padding: 8px 20px;
+}
+.navbar .dropdown-item:hover {
+    background-color: #f0fdf4;
+    color: #1e7e34 !important;
+}
+/* Remove any brand styling – we don't use navbar-brand */
+.navbar-brand {
+    display: none !important;
+}
+
+/* ========== CATEGORY CARDS ========== */
+.category-card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+.hover-effect {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-effect:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+/* ========== PRODUCT CARDS ========== */
+.card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.card-img-top {
+    border-radius: 12px 12px 0 0;
+}
+.card-body {
+    padding: 1rem;
+}
+
+/* ========== BREADCRUMB ========== */
+.breadcrumb {
+    background-color: var(--light-gray);
+    padding: 0.75rem 0;
+    margin-bottom: 0;
+}
+.breadcrumb-item a {
+    color: var(--primary-green);
+    text-decoration: none;
+}
+.breadcrumb-item a:hover {
+    color: var(--dark-green);
+    text-decoration: underline;
+}
+
+/* ========== FOOTER ========== */
+.footer {
+    background-color: #1a1a1a !important;
+}
+.footer a {
+    transition: color 0.3s ease;
+}
+.footer a:hover {
+    color: var(--primary-green) !important;
+}
+
+/* ========== CART BADGE ========== */
+.cart-count {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+}
+
+/* ========== MODAL ========== */
+.modal-content {
+    border-radius: 16px;
+    border: none;
+}
+.modal-header {
+    border-radius: 16px 16px 0 0;
+}
+.modal-header.bg-primary {
+    background-color: var(--primary-green) !important;
+}
+
+/* ========== CAROUSEL FIX - BRIGHTER IMAGES ========== */
+.carousel-item-card,
+.bestseller-item-card {
+    opacity: 0.9;
+    transform: scale(0.92);
+    transition: all 0.5s ease;
+}
+.carousel-item-card.active,
+.bestseller-item-card.active {
+    opacity: 1;
+    transform: scale(1);
+}
+.carousel-item-card.prev-active,
+.carousel-item-card.next-active,
+.bestseller-item-card.prev-active,
+.bestseller-item-card.next-active {
+    opacity: 0.95;
+    transform: scale(0.96);
+}
+
+/* ========== RESPONSIVE ========== */
+
+/* Tablets */
+@media (max-width: 992px) {
+    .navbar .nav-link {
+        font-size: 1.5rem !important;
+    }
+    .navbar .dropdown-item {
+        font-size: 1.2rem !important;
+    }
+    .navbar .dropdown-toggle {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Mobile phones */
+@media (max-width: 768px) {
+    /* Top bar - smaller text */
+    .top-bar {
+        font-size: 0.65rem;
+        padding: 4px 0;
+    }
+    .top-bar .container {
+        flex-wrap: nowrap;
+        justify-content: space-between !important;
+    }
+    .top-bar .left-items {
+        gap: 6px;
+        font-size: 0.65rem;
+    }
+    .top-bar .right-items {
+        gap: 8px;
+        font-size: 0.65rem;
+    }
+    .top-bar .right-items a,
+    .top-bar .right-items span {
+        font-size: 0.65rem;
+    }
+    /* Hide phone number on very small screens */
+    .top-bar .order-phone {
+        display: none;
+    }
+
+    /* Logo: reduce size */
+    .logo-container img {
+        max-height: 100px !important;
+        margin-top: 0 !important;
+    }
+
+    /* Navbar links on mobile - smaller but still green and bold */
+    .navbar .nav-link {
+        font-size: 1.1rem !important;
+        padding: 10px 15px !important;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .navbar .dropdown-item {
+        font-size: 1rem !important;
+        padding: 8px 20px !important;
+    }
+    .navbar .dropdown-toggle {
+        font-size: 1.1rem !important;
+    }
+
+    /* Mobile menu background */
+    .navbar-collapse {
+        background: white;
+        padding: 10px 0;
+        border-radius: 8px;
+        margin-top: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+}
+
+/* Very small phones */
+@media (max-width: 480px) {
+    .top-bar {
+        font-size: 0.55rem;
+        padding: 3px 0;
+    }
+    .top-bar .right-items {
+        gap: 5px;
+    }
+    .top-bar .right-items a,
+    .top-bar .right-items span {
+        font-size: 0.55rem;
+    }
+    .logo-container img {
+        max-height: 70px !important;
+    }
+    .navbar .nav-link {
+        font-size: 1rem !important;
+    }
+    .navbar .dropdown-item {
+        font-size: 0.9rem !important;
+    }
+    .navbar .dropdown-toggle {
+        font-size: 1rem !important;
+    }
+    /* Buttons in product cards */
+    .product-card .btn {
+        font-size: 0.6rem !important;
+        padding: 3px 5px !important;
+    }
+}

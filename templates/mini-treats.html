@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mini Treats - MagdisBakery{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="bg-light py-2">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active">Mini Treats</li>
+        </ol>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="container py-4">
+    <div class="row">
+        <!-- ====== FILTER SIDEBAR ====== -->
+        <div class="col-12 col-md-3 mb-4">
+            <div class="filter-sidebar p-3" style="background: #f8f9fa; border-radius: 12px; border: 1px solid #e9ecef;">
+                <h5 style="color: #28a745; font-weight: 700; margin-bottom: 16px;">Price</h5>
+                <hr style="border-color: #28a745; border-width: 2px; margin-bottom: 16px;">
+
+                <form id="priceFilterForm">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <label for="priceFrom" class="form-label mb-0" style="font-weight: 600; color: #212529;">From</label>
+                        <input type="number" id="priceFrom" class="form-control form-control-sm" 
+                               style="width: 70px; border-radius: 8px; border: 1px solid #dee2e6; padding: 4px 8px;" 
+                               placeholder="0" min="0" value="0">
+                        <span style="font-weight: 600; color: #212529;">to</span>
+                        <input type="number" id="priceTo" class="form-control form-control-sm" 
+                               style="width: 70px; border-radius: 8px; border: 1px solid #dee2e6; padding: 4px 8px;" 
+                               placeholder="1000" min="0" value="1000">
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-sm flex-grow-1" 
+                                style="background-color: #28a745; color: white; border: none; border-radius: 8px; padding: 8px 12px; font-weight: 600;">
+                            Apply All
+                        </button>
+                        <button type="reset" class="btn btn-sm flex-grow-1" 
+                                style="background-color: transparent; color: #28a745; border: 2px solid #28a745; border-radius: 8px; padding: 8px 12px; font-weight: 600;"
+                                id="clearFilterBtn">
+                            Clear All
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ====== PRODUCTS GRID ====== -->
+        <div class="col-12 col-md-9">
+            <h1 class="mb-4" style="color: #28a745; font-size: 1.8rem;">Mini Treats</h1>
+
+            <div class="row g-4" id="productsContainer">
+                {% for product in products %}
+                <div class="col-6 col-lg-4 product-item" data-price="{{ product.price }}">
+                    <div class="card product-card h-100 shadow-sm hover-effect" style="border-radius: 12px; border: none;">
+                        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" 
+                             style="height: 220px; width: 100%; object-fit: contain; background: #f8f9fa; border-radius: 12px 12px 0 0;" 
+                             onerror="this.src='https://via.placeholder.com/200x200/28a745/ffffff?text=No+Image'">
+
+                        <div class="card-body" style="padding: 12px 15px;">
+                            <h6 class="card-title" style="font-weight: 600; font-size: 0.9rem;">{{ product.name }}</h6>
+                            <p class="fw-bold" style="color: #28a745; font-size: 0.95rem;">{{ product.price }} EGP</p>
+
+                            <div class="d-flex gap-2 mt-2 flex-wrap">
+                                <!-- Like Button (no count) -->
+                                <button class="btn btn-sm like-btn" 
+                                        data-product-id="{{ product.id }}" 
+                                        data-liked="{% if user.is_authenticated and user in product.likes.all %}true{% else %}false{% endif %}"
+                                        style="border: 2px solid #dc3545; background: transparent; color: #dc3545; border-radius: 8px; padding: 4px 10px;">
+                                    <i class="{% if user.is_authenticated and user in product.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                                </button>
+
+                                <!-- Add to Cart -->
+                                <button class="btn btn-sm add-to-cart-btn flex-grow-1" 
+                                        data-product-id="{{ product.id }}"
+                                        style="background-color: #28a745; color: white; border: none; border-radius: 8px; padding: 4px 10px; font-weight: 600; font-size: 0.8rem;">
+                                    <i class="fas fa-cart-plus me-1"></i>Add
+                                </button>
+
+                                <!-- Buy Now -->
+                                <button class="btn btn-sm flex-grow-1 buy-btn" 
+                                        data-product-id="{{ product.id }}"
+                                        style="background-color: #1e7e34; color: white; border: none; border-radius: 8px; padding: 4px 10px; font-weight: 600; font-size: 0.8rem;">
+                                    <i class="fas fa-bolt me-1"></i>Buy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center text-muted w-100">No products in this category.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ====== PRICE FILTER ======
+    const products = document.querySelectorAll('.product-item');
+    const priceFromInput = document.getElementById('priceFrom');
+    const priceToInput = document.getElementById('priceTo');
+    const clearBtn = document.getElementById('clearFilterBtn');
+
+    function filterProducts() {
+        const from = parseFloat(priceFromInput.value) || 0;
+        const to = parseFloat(priceToInput.value) || Infinity;
+
+        products.forEach(item => {
+            const price = parseFloat(item.dataset.price);
+            if (price >= from && price <= to) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    document.getElementById('priceFilterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        filterProducts();
+    });
+
+    clearBtn.addEventListener('click', function() {
+        priceFromInput.value = 0;
+        priceToInput.value = 1000;
+        products.forEach(item => {
+            item.style.display = 'block';
+        });
+    });
+});
+</script>
+{% endblock %}
