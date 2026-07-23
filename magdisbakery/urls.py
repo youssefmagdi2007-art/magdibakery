@@ -21,10 +21,10 @@ def logo_view(request):
     with open(logo_path, 'rb') as f:
         return HttpResponse(f.read(), content_type='image/png')
 
-# ----- PDF view – uses lowercase 'pdfs' folder -----
+# ----- PDF view – correct filename -----
 def pdf_view(request):
-    # Looks for: magdisbakery/pdfs/customizedCake.pdf
-    pdf_path = os.path.join(os.path.dirname(__file__), 'pdfs', 'customizedCake.pdf')
+    # Looks for: magdisbakery/pdfs/Customized-Cake.pdf
+    pdf_path = os.path.join(os.path.dirname(__file__), 'pdfs', 'Customized-Cake.pdf')
     with open(pdf_path, 'rb') as f:
         return HttpResponse(f.read(), content_type='application/pdf')
 
