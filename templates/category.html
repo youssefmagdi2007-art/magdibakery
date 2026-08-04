@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - MagdisBakery{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="bg-light py-2">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active">{{ category.name }}</li>
+        </ol>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <h1 class="mb-4">{{ category.name }}</h1>
+    {% if category.description %}
+        <p class="text-muted mb-4">{{ category.description }}</p>
+    {% endif %}
+    
+    <div class="row g-4" id="productsContainer">
+        <!-- Products loaded by JS -->
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const categorySlug = '{{ category.slug }}';
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch(`/api/products/?category__slug=${categorySlug}`)
+        .then(res => res.json())
+        .then(products => {
+            const container = document.getElementById('productsContainer');
+            if (products.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted">No products in this category</p>';
+                return;
+            }
+            
+            container.innerHTML = products.map(p => `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm hover-effect">
+                        <img src="${p.image_url}" class="card-img-top" alt="${p.name}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="card-title">${p.name}</h6>
+                            <p class="text-primary fw-bold">${p.price} EGP</p>
+                            ${p.in_stock ? `
+                                <button class="btn btn-primary btn-sm add-to-cart w-100" data-product-id="${p.id}">
+                                    <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                </button>
+                            ` : `
+                                <button class="btn btn-secondary btn-sm w-100" disabled>Out of Stock</button>
+                            `}
+                            <a href="/product/${p.slug}/" class="btn btn-outline-primary btn-sm w-100 mt-1">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.dataset.productId;
+                    const cartId = localStorage.getItem('cartId') || '';
+                    
+                    if (!cartId) {
+                        fetch('/api/carts/', { method: 'POST' })
+                            .then(res => res.json())
+                            .then(data => {
+                                localStorage.setItem('cartId', data.id);
+                                addToCart(data.id, productId);
+                            });
+                    } else {
+                        addToCart(cartId, productId);
+                    }
+                });
+            });
+        })
+        .catch(err => console.error('Error loading products:', err));
+});
+
+function addToCart(cartId, productId) {
+    fetch(`/api/carts/${cartId}/add_item/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: parseInt(productId), quantity: 1 })
+    })
+    .then(res => res.json())
+    .then(() => {
+        updateCartCount(cartId);
+        showToast('Added to cart successfully!');
+    })
+    .catch(err => console.error('Error adding to cart:', err));
+}
+
+function updateCartCount(cartId) {
+    fetch(`/api/carts/${cartId}/`)
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.querySelector('.cart-count');
+            if (badge) badge.textContent = data.item_count || 0;
+        })
+        .catch(err => console.error('Error updating cart count:', err));
+}
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'position-fixed bottom-0 end-0 p-3';
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `<div class="bg-success text-white p-3 rounded shadow"><i class="fas fa-check-circle me-2"></i>${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) updateCartCount(cartId);
+});
+</script>
+{% endblock %}

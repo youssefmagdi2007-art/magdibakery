@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Favorites - MagdisBakery{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="bg-light py-2">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active">My Favorites</li>
+        </ol>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <h1 class="mb-4" style="color: #28a745;">My Favorites</h1>
+
+    <div class="row g-4" id="productsContainer">
+        {% for product in products %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="card product-card h-100 shadow-sm hover-effect" style="border-radius: 12px; border: none;">
+                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" 
+                     style="height: 200px; object-fit: cover; border-radius: 12px 12px 0 0;" 
+                     onerror="this.src='https://via.placeholder.com/200x200/28a745/ffffff?text=No+Image'">
+
+                <div class="card-body" style="padding: 15px;">
+                    <h6 class="card-title" style="font-weight: 600; font-size: 0.95rem;">{{ product.name }}</h6>
+                    <p class="fw-bold" style="color: #28a745;">{{ product.price }} EGP</p>
+
+                    <div class="d-flex gap-2 mt-2 flex-wrap">
+                        <!-- Unlike button -->
+                        <button class="btn btn-sm like-btn" 
+                                data-product-id="{{ product.id }}" 
+                                data-liked="true"
+                                style="border: 2px solid #dc3545; background: #dc3545; color: white; border-radius: 8px; padding: 6px 10px;">
+                            <i class="fas fa-heart"></i>
+                            <span class="like-count" style="font-size: 0.8rem;">{{ product.likes.count }}</span>
+                        </button>
+
+                        <!-- Add to Cart -->
+                        <button class="btn btn-sm add-to-cart-btn flex-grow-1" 
+                                data-product-id="{{ product.id }}"
+                                style="background-color: #28a745; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-weight: 600;">
+                            <i class="fas fa-cart-plus me-1"></i>Add
+                        </button>
+
+                        <!-- Buy Now – now a button, not a link -->
+                        <button class="btn btn-sm flex-grow-1 buy-btn" 
+                                data-product-id="{{ product.id }}"
+                                style="background-color: #1e7e34; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-weight: 600; text-decoration: none; text-align: center;">
+                            <i class="fas fa-bolt me-1"></i>Buy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center w-100 py-5">
+            <i class="fas fa-heart" style="font-size: 4rem; color: #dc3545; opacity: 0.3;"></i>
+            <h3 class="mt-3" style="color: #6c757d;">No favorites yet</h3>
+            <p class="text-muted">Start liking products to see them here.</p>
+            <a href="{% url 'mini_treats' %}" class="btn btn-primary mt-2" style="background-color: #28a745; border: none;">Browse Products</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ====== UNLIKE ======
+    const likeButtons = document.querySelectorAll('.like-btn');
+
+    likeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const icon = this.querySelector('i');
+            const countSpan = this.querySelector('.like-count');
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = "{% url 'signin' %}?next={{ request.path }}";
+                return;
+            }
+
+            fetch('/api/like/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'JWT ' + token
+                },
+                body: JSON.stringify({ product_id: parseInt(productId) })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.liked) {
+                    // Unlike: remove the card
+                    const card = this.closest('.col-6');
+                    if (card) {
+                        card.remove();
+                        // Update badge
+                        let favBadge = document.getElementById('favoritesCount');
+                        if (favBadge && data.total_likes !== undefined) {
+                            favBadge.textContent = data.total_likes;
+                            favBadge.style.display = data.total_likes > 0 ? 'inline-block' : 'none';
+                        }
+                        // Reload if no products left
+                        const remaining = document.querySelectorAll('.col-6');
+                        if (remaining.length === 0) {
+                            location.reload();
+                        }
+                    }
+                }
+            })
+            .catch(err => console.error('Error toggling like:', err));
+        });
+    });
+
+    // ====== ADD TO CART ======
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+    addToCartButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const cartId = localStorage.getItem('cartId');
+
+            if (!cartId) {
+                fetch('/api/carts/', { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        localStorage.setItem('cartId', data.id);
+                        addToCart(data.id, productId);
+                    })
+                    .catch(err => console.error('Error creating cart:', err));
+            } else {
+                addToCart(cartId, productId);
+            }
+        });
+    });
+
+    function addToCart(cartId, productId) {
+        fetch(`/api/carts/${cartId}/add_item/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: parseInt(productId), quantity: 1 })
+        })
+        .then(res => res.json())
+        .then(() => {
+            updateCartCount(cartId);
+            showToast('Added to cart!', 'success');
+        })
+        .catch(err => console.error('Error adding to cart:', err));
+    }
+
+    function updateCartCount(cartId) {
+        fetch(`/api/carts/${cartId}/`)
+            .then(res => res.json())
+            .then(data => {
+                const badge = document.querySelector('.cart-count');
+                if (badge) {
+                    const count = data.item_count || 0;
+                    badge.textContent = count;
+                    badge.style.display = count > 0 ? 'inline-block' : 'none';
+                }
+            })
+            .catch(err => console.error('Error updating cart count:', err));
+    }
+
+    function showToast(message, type = 'success') {
+        const colors = {
+            success: '#28a745',
+            error: '#dc3545',
+            info: '#17a2b8'
+        };
+        const toast = document.createElement('div');
+        toast.className = 'position-fixed bottom-0 end-0 p-3';
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `
+            <div class="p-3 rounded shadow" style="background-color: ${colors[type]}; color: white;">
+                <i class="fas fa-check-circle me-2"></i>${message}
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Initial cart count
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) updateCartCount(cartId);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - MagdisBakery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .signin-card {
+            max-width: 450px;
+            width: 100%;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            text-align: center;
+            margin: 20px auto;
+        }
+        .signin-card .logo {
+            max-height: 160px;
+            width: auto;
+            margin-bottom: 10px;
+        }
+        .signin-card h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #28a745;
+            margin-bottom: 6px;
+        }
+        .signin-card .subtitle {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+        .signin-card .form-control {
+            border-radius: 10px;
+            padding: 12px 16px;
+            border: 1px solid #dee2e6;
+            transition: border-color 0.2s;
+        }
+        .signin-card .form-control:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40,167,69,0.15);
+        }
+        .signin-card .input-group-text {
+            background: white;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+            padding: 0 16px;
+            color: #6c757d;
+        }
+        .signin-card .input-group-text:hover {
+            color: #28a745;
+        }
+        .btn-primary {
+            background: #28a745;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover {
+            background: #1e7e34;
+        }
+        .signin-card .signup-link {
+            color: #28a745;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .signin-card .signup-link:hover {
+            text-decoration: underline;
+        }
+        .alert {
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        .footer {
+            background-color: #1a1a1a !important;
+            width: 100%;
+            margin-top: auto;
+            padding-top: 3rem !important;
+            padding-bottom: 2rem !important;
+        }
+        .footer a:hover {
+            color: #28a745 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="signin-card">
+    <a href="{% url 'home' %}">
+        <img src="/logo/" alt="MagdisBakery" class="logo">
+    </a>
+
+    <h1>MagdisBakery</h1>
+    <p class="subtitle">Welcome back. Please sign in to continue.</p>
+
+    <form id="loginForm">
+        {% csrf_token %}
+        <div class="mb-3 text-start">
+            <label for="email" class="form-label fw-semibold">Email</label>
+            <input type="email" class="form-control" id="email" placeholder="you@example.com" required autofocus>
+        </div>
+
+        <div class="mb-3 text-start">
+            <label for="password" class="form-label fw-semibold">Password</label>
+            <div class="input-group">
+                <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                <span class="input-group-text" id="togglePassword" role="button">
+                    <i class="fa-regular fa-eye-slash" id="passwordIcon"></i>
+                </span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Sign In</button>
+    </form>
+
+    <div id="loginError" class="alert alert-danger d-none mt-3"></div>
+    <div id="loginSuccess" class="alert alert-success d-none mt-3"></div>
+
+    <p class="mt-3 small text-muted">
+        Don't have an account? <a href="{% url 'register_step1' %}" class="signup-link">Register here</a>
+    </p>
+</div>
+
+<footer class="footer bg-dark text-white">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <h5 class="mb-3"><i class="fas fa-birthday-cake me-2"></i>MagdisBakery</h5>
+                <p class="text-secondary small">Freshly baked goods delivered with love. Your one-stop shop for premium pastries, cakes, and desserts.</p>
+                <div class="mt-3">
+                    <a href="#" class="text-white me-2"><i class="fab fa-facebook fa-lg"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-tiktok fa-lg"></i></a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted">Quick Links</h6>
+                <ul class="list-unstyled small">
+                    <li><a class="link-light text-decoration-none" href="{% url 'home' %}">Home</a></li>
+                    <li><a class="link-light text-decoration-none" href="#">Catering Services</a></li>
+                    <li><a class="link-light text-decoration-none" href="#">Terms & Conditions</a></li>
+                    <li><a class="link-light text-decoration-none" href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6 class="text-uppercase small text-muted">Contact</h6>
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-phone me-2 text-secondary"></i><span class="text-secondary">+20 10 0000 0000</span></li>
+                    <li><i class="fas fa-envelope me-2 text-secondary"></i><span class="text-secondary">info@magdisbakery.com</span></li>
+                    <li><i class="fas fa-map-marker-alt me-2 text-secondary"></i><span class="text-secondary">Cairo, Egypt</span></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary my-4">
+        <p class="text-center text-secondary small mb-0">&copy; 2026 MagdisBakery. Created by Youssef Magdi</p>
+    </div>
+</footer>
+
+<script>
+    // CSRF helper
+    function getCSRFToken() {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+        return cookie ? cookie.split('=')[1] : '';
+    }
+
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const icon = document.getElementById('passwordIcon');
+
+    toggleBtn.addEventListener('click', function () {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    });
+
+    const loginForm = document.getElementById('loginForm');
+    const errorDiv = document.getElementById('loginError');
+    const successDiv = document.getElementById('loginSuccess');
+
+    loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        errorDiv.classList.add('d-none');
+        successDiv.classList.add('d-none');
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        fetch('/api/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({ email: email, password: password })
+        })
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(err => {
+                    throw new Error(err.error || 'Invalid email or password');
+                });
+            }
+            return res.json();
+        })
+        .then(data => {
+            localStorage.setItem('token', data.access);
+            localStorage.setItem('refresh', data.refresh);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            successDiv.textContent = `Welcome back, ${data.user.first_name || data.user.username}!`;
+            successDiv.classList.remove('d-none');
+
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1200);
+        })
+        .catch(err => {
+            errorDiv.textContent = err.message || 'Sign-in failed. Please try again.';
+            errorDiv.classList.remove('d-none');
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

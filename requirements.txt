@@ -1,0 +1,11 @@
+Django>=4.2,<5.0
+djangorestframework
+django-cors-headers
+django-filter
+djoser
+djangorestframework-simplejwt
+gunicorn
+whitenoise
+brevo-python==1.0.0
+requests==2.31.0
+dj-database-url==2.1.0
